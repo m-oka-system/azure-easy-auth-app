@@ -66,6 +66,7 @@ module "app_service" {
   allowed_cidr        = var.allowed_cidr
   identity            = module.user_assigned_identity.user_assigned_identity
   frontdoor_profile   = module.frontdoor.frontdoor_profile
+  frontdoor_endpoint  = module.frontdoor.frontdoor_endpoint
 }
 
 module "frontdoor" {

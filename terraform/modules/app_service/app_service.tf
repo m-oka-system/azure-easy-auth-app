@@ -43,7 +43,10 @@ resource "azurerm_linux_web_app" "this" {
     dynamic "cors" {
       for_each = each.value.site_config.cors != null ? [each.value.site_config.cors] : []
       content {
-        allowed_origins     = cors.value.allowed_origins
+        allowed_origins = [
+          "https://${var.common.prefix}-${var.common.env}-${cors.value.target_app_service}.azurewebsites.net",
+          "https://${var.frontdoor_endpoint[cors.value.target_frontdoor_endpoint].host_name}",
+        ]
         support_credentials = cors.value.support_credentials
       }
     }

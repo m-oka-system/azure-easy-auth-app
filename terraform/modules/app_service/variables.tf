@@ -5,3 +5,4 @@ variable "app_service" {}
 variable "allowed_cidr" {}
 variable "identity" {}
 variable "frontdoor_profile" {}
+variable "frontdoor_endpoint" {}

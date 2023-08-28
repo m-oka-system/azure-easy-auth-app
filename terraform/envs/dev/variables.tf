@@ -56,8 +56,9 @@ variable "app_service" {
       ftps_state             = string
       vnet_route_all_enabled = bool
       cors = object({
-        allowed_origins     = list(string)
-        support_credentials = bool
+        target_app_service        = string
+        target_frontdoor_endpoint = string
+        support_credentials       = bool
       })
       application_stack = object({
         docker_image_name   = string
@@ -123,8 +124,9 @@ variable "app_service" {
         ftps_state             = "Disabled"
         vnet_route_all_enabled = true
         cors = {
-          allowed_origins     = ["https://easyauth-dev-frontend.azurewebsites.net"]
-          support_credentials = true
+          target_app_service        = "frontend"
+          target_frontdoor_endpoint = "frontend"
+          support_credentials       = true
         }
         application_stack = {
           docker_image_name   = "appsvc/staticsite:latest"
