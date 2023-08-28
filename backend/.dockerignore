@@ -1,0 +1,17 @@
+.env
+.secrets
+.devcontainer
+.git
+.github
+.gitignore
+.dockerignore
+.flake8
+pyproject.toml
+__pycache__
+/photo/media/*
+terraform
+Dockerfile
+docker-compose.yml
+db.sqlite3
+*.drawio.svg
+README.md

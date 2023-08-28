@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Client</title>
+</head>
+
+<body>
+
+  <h2>API Client</h2>
+
+  <form id="apiForm">
+    <label for="apiUrl">API URL:</label>
+    <input type="text" id="apiUrl" value="">
+    <br><br>
+
+    <label for="contentType">Content-type:</label>
+    <input type="text" id="contentType" value="application/json">
+    <br><br>
+
+    <button type="button" id="getRequestBtn">GET</button>
+    <button type="button" id="postRequestBtn">POST</button>
+  </form>
+
+  <h3>Debug: Access Token</h3>
+  <textarea id="accessToken" rows="5" cols="50" readonly></textarea>
+
+  <script>
+    const DEFAULT_API_URL = "https://easyauth-dev-backend.azurewebsites.net";
+
+    window.onload = function () {
+      document.getElementById("apiUrl").value = DEFAULT_API_URL;
+
+      document.getElementById("getRequestBtn").addEventListener("click", function () {
+        sendRequest('GET');
+      });
+
+      document.getElementById("postRequestBtn").addEventListener("click", function () {
+        sendRequest('POST');
+      });
+    };
+
+    function getAccessToken() {
+      return fetch("/.auth/me")
+        .then(response => response.json())
+        .then(data => {
+          const token = data[0]?.access_token || '';
+          document.getElementById("accessToken").value = token;
+          return token;
+        });
+    }
+
+    function sendRequest(method) {
+      getAccessToken()
+        .then(token => {
+          const apiUrl = document.getElementById("apiUrl").value;
+          const headers = new Headers();
+
+          const contentType = document.getElementById("contentType").value;
+          if (contentType) {
+            headers.append('Content-Type', contentType);
+          }
+
+          if (token) {
+            headers.append('Authorization', `Bearer ${token}`);
+          }
+
+          return fetch(apiUrl, {
+            method: method,
+            headers: headers
+            // mode: 'no-cors'
+          });
+        })
+        .then(response => {
+          if (response.type === 'opaque') {
+            alert('Request successful but response is opaque due to no-cors mode');
+            return;
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data) {
+            console.log(data);
+            alert('Request successful');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Request failed');
+        });
+    }
+  </script>
+
+</body>
+
+</html>
