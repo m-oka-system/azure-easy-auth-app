@@ -1,8 +1,11 @@
 variable "common" {}
 variable "resource_group_name" {}
-variable "service_plan" {}
 variable "app_service" {}
+variable "app_settings" {}
+variable "allowed_origins" {}
 variable "allowed_cidr" {}
+variable "app_service_plan" {}
 variable "identity" {}
 variable "frontdoor_profile" {}
-variable "frontdoor_endpoint" {}
+variable "tenant_id" {}
+variable "auth_settings_v2" {}

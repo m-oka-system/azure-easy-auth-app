@@ -56,17 +56,28 @@ module "container_registry" {
   container_registry  = var.container_registry
 }
 
+module "app_service_plan" {
+  source = "../../modules/app_service_plan"
+
+  common              = var.common
+  resource_group_name = module.resource_group.resource_group_name
+  app_service_plan    = var.app_service_plan
+}
+
 module "app_service" {
   source = "../../modules/app_service"
 
   common              = var.common
   resource_group_name = module.resource_group.resource_group_name
-  service_plan        = var.service_plan
   app_service         = var.app_service
+  app_settings        = local.app_service.app_settings
+  allowed_origins     = local.app_service.allowed_origins
   allowed_cidr        = var.allowed_cidr
+  app_service_plan    = module.app_service_plan.app_service_plan
   identity            = module.user_assigned_identity.user_assigned_identity
   frontdoor_profile   = module.frontdoor.frontdoor_profile
-  frontdoor_endpoint  = module.frontdoor.frontdoor_endpoint
+  tenant_id           = local.common.tenant_id
+  auth_settings_v2    = local.app_service.auth_settings_v2
 }
 
 module "frontdoor" {
