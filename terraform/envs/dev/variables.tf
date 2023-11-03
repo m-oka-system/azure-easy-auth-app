@@ -28,7 +28,7 @@ variable "container_registry" {
   }
 }
 
-variable "service_plan" {
+variable "app_service_plan" {
   type = map(map(string))
   default = {
     app = {
@@ -48,17 +48,17 @@ variable "app_service" {
     target_frontdoor_profile      = string
     https_only                    = bool
     public_network_access_enabled = bool
-    identity = object({
-      type = string
+    sticky_settings = object({
+      app_setting_names = list(string)
     })
     site_config = object({
       always_on              = bool
       ftps_state             = string
       vnet_route_all_enabled = bool
       cors = object({
-        target_app_service        = string
-        target_frontdoor_endpoint = string
-        support_credentials       = bool
+        allowed_origins_key         = string
+        allowed_origins_staging_key = string
+        support_credentials         = bool
       })
       application_stack = object({
         docker_image_name   = string
@@ -72,17 +72,29 @@ variable "app_service" {
       ip_address  = string
       service_tag = string
     }))
+    scm_ip_restriction = map(object({
+      name        = string
+      priority    = number
+      action      = string
+      ip_address  = string
+      service_tag = string
+    }))
+    use_easy_auth = bool
   }))
   default = {
     frontend = {
       name                          = "frontend"
       target_service_plan           = "app"
       target_subnet                 = "app"
-      target_user_assigned_identity = null
+      target_user_assigned_identity = "frontend"
       target_frontdoor_profile      = "app"
       https_only                    = true
       public_network_access_enabled = true
-      identity                      = null
+      sticky_settings = {
+        app_setting_names = [
+          "MICROSOFT_PROVIDER_AUTHENTICATION_SECRET",
+        ]
+      }
       site_config = {
         always_on              = false
         ftps_state             = "Disabled"
@@ -106,6 +118,23 @@ variable "app_service" {
           service_tag = null
         }
       }
+      scm_ip_restriction = {
+        devops = {
+          name        = "AllowDevOps"
+          priority    = 100
+          action      = "Allow"
+          ip_address  = null
+          service_tag = "AzureCloud"
+        }
+        myip = {
+          name        = "AllowMyIP"
+          priority    = 200
+          action      = "Allow"
+          ip_address  = "MyIP"
+          service_tag = null
+        }
+      }
+      use_easy_auth = true
     }
     backend = {
       name                          = "backend"
@@ -115,19 +144,16 @@ variable "app_service" {
       target_frontdoor_profile      = "app"
       https_only                    = true
       public_network_access_enabled = true
-      identity                      = null
-      identity = {
-        type = "UserAssigned"
+      sticky_settings = {
+        app_setting_names = [
+          "MICROSOFT_PROVIDER_AUTHENTICATION_SECRET",
+        ]
       }
       site_config = {
         always_on              = false
         ftps_state             = "Disabled"
         vnet_route_all_enabled = true
-        cors = {
-          target_app_service        = "frontend"
-          target_frontdoor_endpoint = "frontend"
-          support_credentials       = true
-        }
+        cors                   = null
         application_stack = {
           docker_image_name   = "appsvc/staticsite:latest"
           docker_registry_url = "https://mcr.microsoft.com"
@@ -149,8 +175,32 @@ variable "app_service" {
           service_tag = null
         }
       }
+      scm_ip_restriction = {
+        devops = {
+          name        = "AllowDevOps"
+          priority    = 100
+          action      = "Allow"
+          ip_address  = null
+          service_tag = "AzureCloud"
+        }
+        myip = {
+          name        = "AllowMyIP"
+          priority    = 200
+          action      = "Allow"
+          ip_address  = "MyIP"
+          service_tag = null
+        }
+      }
+      use_easy_auth = true
     }
   }
+}
+
+variable "easy_auth" {
+  type = map(object({
+    client_id     = string
+    client_secret = string
+  }))
 }
 
 variable "frontdoor_profile" {
@@ -309,6 +359,9 @@ variable "user_assigned_identity" {
     name = string
   }))
   default = {
+    frontend = {
+      name = "frontend"
+    }
     backend = {
       name = "backend"
     }
