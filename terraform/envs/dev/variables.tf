@@ -134,7 +134,7 @@ variable "app_service" {
           service_tag = null
         }
       }
-      use_easy_auth = true
+      use_easy_auth = false
     }
     backend = {
       name                          = "backend"
@@ -191,7 +191,7 @@ variable "app_service" {
           service_tag = null
         }
       }
-      use_easy_auth = true
+      use_easy_auth = false
     }
   }
 }
